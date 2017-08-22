@@ -118,8 +118,12 @@
     }
 
     if (iterator !== undefined) {
+      var bools = {};
       return _.filter(uniqArray, function(item) {
-        return iterator(item);
+        if (!bools.hasOwnProperty(iterator(item))) {
+          bools[iterator(item)] = 1;
+          return true;
+        }
       });
     }
 
