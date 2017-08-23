@@ -137,8 +137,8 @@
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
     var transformedArr = [];
-    _.each(collection, function(item) {
-      transformedArr.push(iterator(item));
+    _.each(collection, function(item, index, collection) {
+      transformedArr.push(iterator(item, index, collection));
     });
     return transformedArr;
   };
@@ -381,6 +381,15 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
+    if (typeof functionOrKey === 'string') {
+      return _.map(collection, function(item) {
+        return item[functionOrKey]();  
+      });
+    } else if (typeof functionOrKey === 'function') {
+      return _.map(collection, function(item) {
+        return functionOrKey.apply(item, args);
+      });
+    }
   };
 
   // Sort the object's values by a criterion produced by an iterator.
@@ -388,6 +397,15 @@
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
+    if (typeof iterator === 'function') {
+      return collection.sort(function(item1, item2) {
+        return iterator(item1) - iterator(item2);
+      });
+    } else if (typeof iterator === 'string') {
+      return collection.sort(function(item1, item2) {
+        return item1[iterator] - item2[iterator];
+      });
+    } 
   };
 
   // Zip together two or more arrays with elements of the same index
@@ -396,6 +414,21 @@
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
+    var arr0 = arguments[0];
+    var arrFrom1 = Array.prototype.slice.call(arguments, 1);
+    var maxLength = _.reduce(arguments, function(max, item) {
+      return item.length > max ? item.length : max;
+    }, 0);
+    while (arr0.length < maxLength) {
+      arr0.push(undefined);
+    }
+    return _.map(arr0, function(item1, index) {
+      var resultArray = [item1];
+      _.each(arrFrom1, function(subArray) {
+        resultArray.push(subArray[index]);
+      });
+      return resultArray;
+    });
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
